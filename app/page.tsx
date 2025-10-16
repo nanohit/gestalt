@@ -7,7 +7,7 @@ import styles from "./page.module.css";
 import { createEmptyDay, createEmptyPricingOption, createEmptySession, createEmptySpeaker } from "@/app/lib/content";
 import { useSiteContent } from "@/app/hooks/useSiteContent";
 
-type EditableTextProps<T extends keyof JSX.IntrinsicElements> = {
+type EditableTextProps<T extends keyof React.JSX.IntrinsicElements> = {
   tag?: T;
   value: string;
   canEdit: boolean;
@@ -15,7 +15,7 @@ type EditableTextProps<T extends keyof JSX.IntrinsicElements> = {
   onChange: (value: string) => void;
 };
 
-function EditableText<T extends keyof JSX.IntrinsicElements = "span">({
+function EditableText<T extends keyof React.JSX.IntrinsicElements = "span">({
   tag,
   value,
   canEdit,
