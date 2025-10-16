@@ -146,32 +146,19 @@ const pricing = [
 ];
 
 export default function Home() {
+  const scrollToElement = (element: HTMLElement | null) => {
+    if (!element) return;
+    element.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const handleScrollToProgram = () => {
-    const section = document.getElementById('program');
-    if (section) {
-      const headerHeight = 145; // Account for fixed header
-      const elementPosition = section.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-    }
+    const section = document.getElementById("program");
+    scrollToElement(section);
   };
 
   const handleScrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
-    if (section) {
-      const headerHeight = 135; // Account for fixed header
-      const elementPosition = section.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-    }
+    scrollToElement(section);
   };
 
   return (

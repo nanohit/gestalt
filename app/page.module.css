@@ -84,7 +84,7 @@
 
 .hero {
   position: relative;
-  padding: 80px 0 150px;
+  padding: 70px 0 120px;
 }
 
 .mobileLogos {
@@ -238,6 +238,7 @@
 
 .section {
   padding: 0 0 120px;
+  scroll-margin-top: 140px;
 }
 
 .sectionHeading {
@@ -687,10 +688,6 @@
 }
 
 @media (max-width: 900px) {
-  .page {
-    zoom: 0.85;
-  }
-
   .headerContainer {
     flex-direction: column;
     gap: 20px;
@@ -709,7 +706,7 @@
   }
 
   .hero {
-    padding-bottom: 100px;
+    padding: 80px 0 90px;
   }
 
   .heroConferenceLabel {
@@ -717,12 +714,13 @@
   }
 
   .heroHeading {
-    font-size: 42px;
+    font-size: 36px;
   }
 
   .heroDetails {
     grid-template-columns: repeat(1, minmax(0, 1fr));
-    padding: 28px;
+    padding: 24px;
+    gap: 16px;
   }
 
   .heroArrowButton {
@@ -736,7 +734,85 @@
   }
 
   .sectionHeading {
-    font-size: 32px;
+    font-size: 30px;
+    margin-bottom: 32px;
+  }
+
+  .section {
+    scroll-margin-top: 120px;
+  }
+
+  .container,
+  .headerContainer {
+    width: min(100%, calc(100% - 48px));
+  }
+
+  .heroInner {
+    gap: 28px;
+  }
+
+  .heroHeading {
+    font-size: 34px;
+  }
+
+  .heroSubheading {
+    font-size: 18px;
+  }
+
+  .heroDetails {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    padding: 24px;
+  }
+
+  .programGrid,
+  .speakersGrid,
+  .pricingGrid {
+    gap: 20px;
+  }
+
+  .programColumnHeader {
+    font-size: 20px;
+  }
+
+  .sessionTitle,
+  .speakerName,
+  .priceValue {
+    font-size: 26px;
+  }
+
+  .heroDetailValue {
+    font-size: 20px;
+  }
+
+  .sectionHeading {
+    font-size: 30px;
+  }
+
+  .sessionCard,
+  .speakerCard,
+  .priceCard,
+  .registrationStep,
+  .registrationNotifications,
+  .contactSection {
+    padding: 24px;
+  }
+
+  .pricingGrid,
+  .programGrid,
+  .speakersGrid {
+    gap: 18px;
+  }
+
+  .priceValue {
+    font-size: 30px;
+  }
+
+  .pricingDiscountTitle {
+    font-size: 18px;
+  }
+
+  .pricingDiscountText {
+    font-size: 16px;
   }
 }
 
@@ -751,7 +827,7 @@
   }
 
   .heroHeading {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   .heroButtonPrimary,
@@ -763,6 +839,70 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+
+  .hero {
+    padding: 60px 0 70px;
+  }
+
+  .section {
+    scroll-margin-top: 110px;
+  }
+
+  .container,
+  .headerContainer {
+    width: min(100%, calc(100% - 32px));
+  }
+
+  .heroHeading {
+    font-size: 28px;
+  }
+
+  .heroSubheading {
+    font-size: 16px;
+  }
+
+  .heroDetails {
+    padding: 20px;
+  }
+
+  .heroDetailValue {
+    font-size: 18px;
+  }
+
+  .sessionCard,
+  .speakerCard,
+  .priceCard,
+  .registrationStep,
+  .registrationNotifications,
+  .contactSection {
+    padding: 20px;
+  }
+
+  .programGrid,
+  .speakersGrid,
+  .pricingGrid {
+    gap: 14px;
+  }
+
+  .priceValue {
+    font-size: 26px;
+  }
+
+  .pricingDiscountTitle {
+    font-size: 17px;
+  }
+
+  .pricingDiscountText {
+    font-size: 15px;
+  }
+
+  .registrationNotificationsTitle {
+    font-size: 17px;
+  }
+
+  .registrationNotificationsList {
+    font-size: 15px;
   }
 }
 
