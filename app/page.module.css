@@ -688,8 +688,7 @@
 
 @media (max-width: 900px) {
   .page {
-    transform: scale(0.85);
-    transform-origin: top center;
+    zoom: 0.85;
   }
 
   .headerContainer {
