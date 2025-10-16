@@ -654,6 +654,10 @@
   width: min(1180px, calc(100% - 96px));
   margin: 0 auto;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
 }
 
 .footerContent {
@@ -663,11 +667,235 @@
   align-items: center;
 }
 
+.footerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.loginButton {
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(10, 159, 180, 0.15);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.loginButton:hover {
+  background: rgba(49, 224, 244, 0.4);
+  transform: translateY(-1px);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 31, 38, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+
+.modalContent {
+  position: relative;
+  width: min(480px, 100%);
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 30px 80px rgba(8, 72, 86, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modalClose {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(10, 159, 180, 0.12);
+  color: #0a9fb4;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modalTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #14343f;
+  text-align: center;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modalLabel {
+  font-size: 16px;
+  font-weight: 600;
+  color: #14343f;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modalInput {
+  border-radius: 12px;
+  border: 1px solid rgba(10, 159, 180, 0.25);
+  padding: 12px 16px;
+  font-size: 16px;
+  color: #153842;
+}
+
+.modalInput:focus {
+  outline: none;
+  border-color: rgba(10, 159, 180, 0.65);
+  box-shadow: 0 0 0 3px rgba(16, 196, 216, 0.2);
+}
+
+.modalError {
+  color: #d64545;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.modalSubmit {
+  border: none;
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #13c8dc 0%, #31e0f4 100%);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 16px 40px rgba(29, 191, 212, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modalSubmit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 48px rgba(12, 170, 186, 0.3);
+}
+
+.editable {
+  cursor: text;
+  position: relative;
+}
+
+.editable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px dashed transparent;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+.editable:hover::after {
+  border-color: rgba(16, 196, 216, 0.4);
+  background: rgba(16, 196, 216, 0.08);
+}
+
+.editing {
+  background: rgba(16, 196, 216, 0.1);
+  border-radius: 8px;
+}
+
+.controlButton {
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(10, 159, 180, 0.18);
+  color: #0a9fb4;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.controlButton:hover {
+  background: rgba(16, 196, 216, 0.4);
+  transform: translateY(-1px);
+}
+
+.inlineControls {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.addCardButton {
+  margin-top: 24px;
+  align-self: center;
+}
+
+.featureRow .editable::after,
+.tagRow .editable::after,
+.priceFeatures .editable::after,
+.speakerTags .editable::after,
+.programColumnHeader .editable::after {
+  border-radius: 12px;
+}
+
+.priceBadge.editable::after {
+  border-radius: 999px;
+}
+
+.columnControls {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  gap: 12px;
+}
+
+.tagRow,
+.featureRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emptyState {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 16px;
+  color: #516e7a;
+}
 .footerContent p {
   font-size: 16px;
   color: #a0c4d0;
   line-height: 1.6;
   margin: 4px 0;
+}
+
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: rgba(16, 196, 216, 0.92);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 18px 48px rgba(8, 109, 129, 0.18);
+  z-index: 250;
 }
 
 @media (max-width: 1200px) {

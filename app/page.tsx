@@ -1,151 +1,145 @@
 'use client';
 
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { FormEvent, KeyboardEvent, Ref } from "react";
 import Image from "next/image";
 import styles from "./page.module.css";
+import { createEmptyDay, createEmptyPricingOption, createEmptySession, createEmptySpeaker } from "@/app/lib/content";
+import { useSiteContent } from "@/app/hooks/useSiteContent";
 
-const programSchedule = [
-  {
-    date: "24 ноября",
-    sessions: [
-      {
-        time: "10:00\u00a0-\u00a011:30",
-        type: "Пленарная сессия",
-        title: "Основы гештальт-терапии в современном контексте",
-        description: "Основной доклад",
-      },
-      {
-        time: "11:45 - 13:15",
-        type: "Семинар",
-        title: "Работа с травмой через призму гештальт-подхода",
-        description: "Практический семинар",
-      },
-      {
-        time: "13:15 - 14:00",
-        type: "Дискуссия",
-        title: "Обсуждения и QA",
-        description: "Интерактивная сессия",
-      },
-    ],
-  },
-  {
-    date: "25 ноября",
-    sessions: [
-      {
-        time: "10:00\u00a0-\u00a011:30",
-        type: "Пленарная сессия",
-        title: "Контакт и поддержка в онлайн-терапии",
-        description: "Методологический доклад",
-      },
-      {
-        time: "11:45 - 13:15",
-        type: "Мастер-класс",
-        title: "Полевые процессы в групповой работе",
-        description: "Групповой опыт",
-      },
-      {
-        time: "13:15 - 14:00",
-        type: "Супервизия",
-        title: "Супервизорские группы: обмен опытом",
-        description: "Интерактивная сессия",
-      },
-    ],
-  },
-  {
-    date: "26 ноября",
-    sessions: [
-      {
-        time: "10:00\u00a0-\u00a011:30",
-        type: "Пленарная сессия",
-        title: "Контакт и поддержка в онлайн-терапии",
-        description: "Методологический доклад",
-      },
-      {
-        time: "11:45 - 13:15",
-        type: "Мастер-класс",
-        title: "Полевые процессы в групповой работе",
-        description: "Групповой опыт",
-      },
-      {
-        time: "13:15 - 14:00",
-        type: "Супервизия",
-        title: "Супервизорские группы: обмен опытом",
-        description: "Интерактивная сессия",
-      },
-    ],
-  },
-];
+type EditableTextProps<T extends keyof JSX.IntrinsicElements> = {
+  tag?: T;
+  value: string;
+  canEdit: boolean;
+  className?: string;
+  onChange: (value: string) => void;
+};
 
-const speakers = [
-  {
-    name: "Анна Петрова",
-    role: "Ведущий гештальт-терапевт",
-    experience: "15+ лет практики",
-    description:
-      "Специалист по работе с терапевтическим опытом. Автор публикаций по современным подходам в гештальт-терапии.",
-    tags: ["Контакт", "Поддержка", "Травма и восстановление"],
-  },
-  {
-    name: "Михаил Иванов",
-    role: "Супервизор, тренер",
-    experience: "20+ лет практики",
-    description:
-      "Эксперт в области групповых процессов и полевых феноменов. Ведущий программ подготовки терапевтов.",
-    tags: ["Супервизия", "Обучение", "Групповая терапия"],
-  },
-  {
-    name: "Дмитрий Козлов",
-    role: "Философ, терапевт",
-    experience: "18 лет практики",
-    description:
-      "Специалист по работе с травматическим опытом. Автор публикаций по современным подходам в гештальт-терапии.",
-    tags: ["Философия", "Современность", "Этика терапии"],
-  },
-  {
-    name: "Елена Смирнова",
-    role: "Клинический психолог",
-    experience: "12 лет практики",
-    description:
-      "Пионер в области онлайн гештальт-терапии. Исследователь цифровых особенностей контакта в цифровом пространстве.",
-    tags: ["Контакт", "Онлайн-практика", "Интеграция"],
-  },
-];
+function EditableText<T extends keyof JSX.IntrinsicElements = "span">({
+  tag,
+  value,
+  canEdit,
+  className,
+  onChange,
+}: EditableTextProps<T>) {
+  const Tag = (tag ?? "span") as T;
+  const [isEditing, setIsEditing] = useState(false);
+  const [initialValue, setInitialValue] = useState(value);
+  const elementRef = useRef<HTMLElement | null>(null);
+  const cancelRef = useRef(false);
+  const isEditingRef = useRef(isEditing);
 
-const pricing = [
-  {
-    label: "Лучшая цена",
-    period: "До 20 октября",
-    price: "6 000₽",
-    features: [
-      "Доступ ко всем сессиям",
-      "Материалы конференции",
-      "Сертификат участника",
-      "Запись всех выступлений",
-    ],
-    highlight: true,
-  },
-  {
-    period: "С 20 октября",
-    price: "7 000₽",
-    features: [
-      "Доступ ко всем сессиям",
-      "Материалы конференции",
-      "Сертификат участника",
-      "Запись всех выступлений",
-    ],
-  },
-  {
-    period: "С 17 ноября и в день начала",
-    price: "8 000₽",
-    features: [
-      "Доступ ко всем сессиям",
-      "Материалы конференции",
-      "Сертификат участника",
-      "Запись всех выступлений",
-    ],
-  },
-];
+  useEffect(() => {
+    isEditingRef.current = isEditing;
+  }, [isEditing]);
+
+  useEffect(() => {
+    if (!isEditing && elementRef.current) {
+      if (elementRef.current.innerText !== value) {
+        elementRef.current.innerText = value;
+      }
+      setInitialValue(value);
+    }
+  }, [isEditing, value]);
+
+  const enableEditing = useCallback(() => {
+    if (!canEdit) return;
+    setInitialValue(value);
+    setIsEditing(true);
+    cancelRef.current = false;
+    requestAnimationFrame(() => {
+      const element = elementRef.current;
+      if (element) {
+        element.focus({ preventScroll: true });
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
+    });
+  }, [canEdit, value]);
+
+  const commitChanges = useCallback(() => {
+    const element = elementRef.current;
+    if (!element) return;
+    const nextValue = element.innerText.trim();
+    onChange(nextValue);
+    setIsEditing(false);
+  }, [onChange]);
+
+  const cancelChanges = useCallback(() => {
+    const element = elementRef.current;
+    if (element) {
+      element.innerText = initialValue;
+    }
+    cancelRef.current = true;
+    setIsEditing(false);
+  }, [initialValue]);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (!isEditing) return;
+      if (event.key === "Enter") {
+        event.preventDefault();
+        commitChanges();
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cancelChanges();
+      }
+    },
+    [cancelChanges, commitChanges, isEditing],
+  );
+
+  const handleBlur = useCallback(() => {
+    if (!isEditingRef.current) {
+      cancelRef.current = false;
+      return;
+    }
+    if (cancelRef.current) {
+      cancelRef.current = false;
+      return;
+    }
+    commitChanges();
+  }, [commitChanges]);
+
+  const refCallback = useCallback(
+    (element: HTMLElement | null) => {
+      elementRef.current = element;
+    },
+    [value],
+  );
+
+  return (
+    <Tag
+      ref={refCallback as unknown as Ref<any>}
+      className={`${className ?? ""} ${canEdit ? styles.editable : ""} ${
+        isEditing ? styles.editing : ""
+      }`}
+      contentEditable={isEditing}
+      suppressContentEditableWarning
+      onClick={enableEditing}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      role={canEdit ? "textbox" : undefined}
+      aria-label={canEdit ? "Редактируемый текст" : undefined}
+      tabIndex={canEdit ? 0 : undefined}
+    >
+      {value}
+    </Tag>
+  );
+}
 
 export default function Home() {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const { content, status, error, setContentState, reload } = useSiteContent(isAdmin);
+  const { programDays, speakers: speakerItems, pricingOptions, discountTitle, discountText } = content;
+
   const scrollToElement = (element: HTMLElement | null) => {
     if (!element) return;
     element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -160,6 +154,38 @@ export default function Home() {
     const section = document.getElementById(sectionId);
     scrollToElement(section);
   };
+
+  const handleOpenLogin = useCallback(() => {
+    setLogin("admin");
+    setPassword("");
+    setLoginError("");
+    setIsLoginModalOpen(true);
+  }, []);
+
+  const handleCloseLogin = useCallback(() => {
+    setIsLoginModalOpen(false);
+    setPassword("");
+    setLoginError("");
+  }, []);
+
+  const handleLoginSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if (login === "admin" && password === "123456789") {
+        setIsAdmin(true);
+        setIsLoginModalOpen(false);
+        setPassword("");
+        setLoginError("");
+      } else {
+        setLoginError("Неверный логин или пароль");
+      }
+    },
+    [login, password],
+  );
+
+  const handleLogout = useCallback(() => {
+    setIsAdmin(false);
+  }, []);
 
   return (
     <div className={styles.page}>
@@ -254,76 +280,526 @@ export default function Home() {
         <section id="program" className={styles.section}>
           <h2 className={styles.sectionHeading}>Программа конференции</h2>
           <div className={styles.programGrid}>
-            {programSchedule.map((day, index) => (
-              <div key={`${day.date}-${index}`} className={styles.programColumn}>
-                <div className={styles.programColumnHeader}>{day.date}</div>
+            {programDays.map((day, dayIndex) => (
+              <div key={`${day.date}-${dayIndex}`} className={styles.programColumn}>
+                <EditableText
+                  tag="div"
+                  value={day.date}
+                  canEdit={isAdmin}
+                  className={styles.programColumnHeader}
+                  onChange={(nextValue) =>
+                    setContentState((prev) => {
+                      const next = { ...prev };
+                      next.programDays = prev.programDays.map((item, index) =>
+                        index === dayIndex ? { ...item, date: nextValue } : item,
+                      );
+                      return next;
+                    })
+                  }
+                />
                 <div className={styles.programColumnBody}>
                   {day.sessions.map((session, sessionIndex) => (
                     <div key={`${day.date}-${sessionIndex}`} className={styles.sessionCard}>
                       <div className={styles.sessionMeta}>
-                        <span className={styles.sessionTime}>{session.time}</span>
-                        <span className={styles.sessionType}>{session.type}</span>
+                        <EditableText
+                          tag="span"
+                          value={session.time}
+                          canEdit={isAdmin}
+                          className={styles.sessionTime}
+                          onChange={(nextValue) =>
+                            setContentState((prev) => {
+                              const next = { ...prev };
+                              next.programDays = prev.programDays.map((item, index) => {
+                                if (index !== dayIndex) return item;
+                                const sessions = item.sessions.map((s, idx) =>
+                                  idx === sessionIndex ? { ...s, time: nextValue } : s,
+                                );
+                                return { ...item, sessions };
+                              });
+                              return next;
+                            })
+                          }
+                        />
+                        <EditableText
+                          tag="span"
+                          value={session.type}
+                          canEdit={isAdmin}
+                          className={styles.sessionType}
+                          onChange={(nextValue) =>
+                            setContentState((prev) => {
+                              const next = { ...prev };
+                              next.programDays = prev.programDays.map((item, index) => {
+                                if (index !== dayIndex) return item;
+                                const sessions = item.sessions.map((s, idx) =>
+                                  idx === sessionIndex ? { ...s, type: nextValue } : s,
+                                );
+                                return { ...item, sessions };
+                              });
+                              return next;
+                            })
+                          }
+                        />
                       </div>
-                      <div className={styles.sessionTitle}>{session.title}</div>
-                      <div className={styles.sessionDescription}>
-                        {session.description}
+                      <EditableText
+                        tag="div"
+                        value={session.title}
+                        canEdit={isAdmin}
+                        className={styles.sessionTitle}
+                        onChange={(nextValue) =>
+                          setContentState((prev) => {
+                            const next = { ...prev };
+                            next.programDays = prev.programDays.map((item, index) => {
+                              if (index !== dayIndex) return item;
+                              const sessions = item.sessions.map((s, idx) =>
+                                idx === sessionIndex ? { ...s, title: nextValue } : s,
+                              );
+                              return { ...item, sessions };
+                            });
+                            return next;
+                          })
+                        }
+                      />
+                      <EditableText
+                        tag="div"
+                        value={session.description}
+                        canEdit={isAdmin}
+                        className={styles.sessionDescription}
+                        onChange={(nextValue) =>
+                          setContentState((prev) => {
+                            const next = { ...prev };
+                            next.programDays = prev.programDays.map((item, index) => {
+                              if (index !== dayIndex) return item;
+                              const sessions = item.sessions.map((s, idx) =>
+                                idx === sessionIndex ? { ...s, description: nextValue } : s,
+                              );
+                              return { ...item, sessions };
+                            });
+                            return next;
+                          })
+                        }
+                      />
+                      {isAdmin && (
+                        <div className={styles.inlineControls}>
+                          <button
+                            type="button"
+                            className={styles.controlButton}
+                            onClick={() =>
+                              setContentState((prev) => {
+                                const next = { ...prev };
+                                next.programDays = prev.programDays.map((item, index) => {
+                                  if (index !== dayIndex) return item;
+                                  const sessions = item.sessions.filter((_, idx) => idx !== sessionIndex);
+                                  return { ...item, sessions: sessions.length ? sessions : [createEmptySession()] };
+                                });
+                                return next;
+                              })
+                            }
+                            aria-label="Удалить сессию"
+                          >
+                            −
+                          </button>
                       </div>
+                      )}
                     </div>
                   ))}
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className={`${styles.controlButton} ${styles.addButton}`}
+                      onClick={() =>
+                        setContentState((prev) => {
+                          const next = { ...prev };
+                          next.programDays = prev.programDays.map((item, index) =>
+                            index === dayIndex
+                              ? { ...item, sessions: [...item.sessions, createEmptySession()] }
+                              : item,
+                          );
+                          return next;
+                        })
+                      }
+                      aria-label="Добавить сессию"
+                    >
+                      + Добавить сессию
+                    </button>
+                  )}
                 </div>
+                {isAdmin && (
+                  <div className={styles.columnControls}>
+                    <button
+                      type="button"
+                      className={`${styles.controlButton} ${styles.addButton}`}
+                      onClick={() =>
+                        setContentState((prev) => {
+                          const nextDays = [...prev.programDays];
+                          nextDays.splice(dayIndex + 1, 0, createEmptyDay());
+                          return { ...prev, programDays: nextDays };
+                        })
+                      }
+                      aria-label="Добавить день"
+                    >
+                      + День
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.controlButton}
+                      onClick={() =>
+                        setContentState((prev) => {
+                          const nextDays = prev.programDays.length === 1
+                            ? [createEmptyDay()]
+                            : prev.programDays.filter((_, idx) => idx !== dayIndex);
+                          return { ...prev, programDays: nextDays };
+                        })
+                      }
+                      aria-label="Удалить день"
+                    >
+                      − День
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
+          {isAdmin && programDays.length === 0 && (
+            <div className={styles.emptyState}>Нет данных. Добавьте день программы.</div>
+          )}
         </section>
 
         <section className={styles.section} id="speakers">
           <h2 className={styles.sectionHeading}>Спикеры конференции</h2>
           <div className={styles.speakersGrid}>
-            {speakers.map((speaker) => (
-              <div key={speaker.name} className={styles.speakerCard}>
+            {speakerItems.map((speaker, speakerIndex) => (
+              <div key={`${speaker.name}-${speakerIndex}`} className={styles.speakerCard}>
                 <div className={styles.speakerPhoto} />
                 <div>
-                  <div className={styles.speakerName}>{speaker.name}</div>
-                  <div className={styles.speakerRole}>{speaker.role}</div>
-                  <div className={styles.speakerExperience}>{speaker.experience}</div>
+                  <EditableText
+                    tag="div"
+                    value={speaker.name}
+                    canEdit={isAdmin}
+                    className={styles.speakerName}
+                    onChange={(nextValue) =>
+                      setContentState((prev) => {
+                        const speakers = prev.speakers.map((item, index) =>
+                          index === speakerIndex ? { ...item, name: nextValue } : item,
+                        );
+                        return { ...prev, speakers };
+                      })
+                    }
+                  />
+                  <EditableText
+                    tag="div"
+                    value={speaker.role}
+                    canEdit={isAdmin}
+                    className={styles.speakerRole}
+                    onChange={(nextValue) =>
+                      setContentState((prev) => {
+                        const speakers = prev.speakers.map((item, index) =>
+                          index === speakerIndex ? { ...item, role: nextValue } : item,
+                        );
+                        return { ...prev, speakers };
+                      })
+                    }
+                  />
+                  <EditableText
+                    tag="div"
+                    value={speaker.experience}
+                    canEdit={isAdmin}
+                    className={styles.speakerExperience}
+                    onChange={(nextValue) =>
+                      setContentState((prev) => {
+                        const speakers = prev.speakers.map((item, index) =>
+                          index === speakerIndex ? { ...item, experience: nextValue } : item,
+                        );
+                        return { ...prev, speakers };
+                      })
+                    }
+                  />
                 </div>
-                <div className={styles.speakerDescription}>{speaker.description}</div>
+                <EditableText
+                  tag="div"
+                  value={speaker.description}
+                  canEdit={isAdmin}
+                  className={styles.speakerDescription}
+                  onChange={(nextValue) =>
+                    setContentState((prev) => {
+                      const speakers = prev.speakers.map((item, index) =>
+                        index === speakerIndex ? { ...item, description: nextValue } : item,
+                      );
+                      return { ...prev, speakers };
+                    })
+                  }
+                />
                 <div className={styles.speakerTags}>
-                  {speaker.tags.map((tag) => (
-                    <span key={tag} className={styles.speakerTag}>
-                      {tag}
-                    </span>
+                  {speaker.tags.map((tag, tagIndex) => (
+                    <div key={`${tag}-${tagIndex}`} className={styles.tagRow}>
+                      <EditableText
+                        tag="span"
+                        value={tag}
+                        canEdit={isAdmin}
+                        className={styles.speakerTag}
+                        onChange={(nextValue) =>
+                          setContentState((prev) => {
+                            const speakers = prev.speakers.map((item, index) => {
+                              if (index !== speakerIndex) return item;
+                              const tags = item.tags.map((t, idx) => (idx === tagIndex ? nextValue : t));
+                              return { ...item, tags };
+                            });
+                            return { ...prev, speakers };
+                          })
+                        }
+                      />
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          className={styles.controlButton}
+                          onClick={() =>
+                            setContentState((prev) => {
+                              const speakers = prev.speakers.map((item, index) => {
+                                if (index !== speakerIndex) return item;
+                                const tags = item.tags.filter((_, idx) => idx !== tagIndex);
+                                return { ...item, tags: tags.length ? tags : ["Новый тег"] };
+                              });
+                              return { ...prev, speakers };
+                            })
+                          }
+                          aria-label="Удалить тег"
+                        >
+                          −
+                        </button>
+                      )}
+                    </div>
                   ))}
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className={`${styles.controlButton} ${styles.addButton}`}
+                      onClick={() =>
+                        setContentState((prev) => {
+                          const speakers = prev.speakers.map((item, index) =>
+                            index === speakerIndex ? { ...item, tags: [...item.tags, "Новый тег"] } : item,
+                          );
+                          return { ...prev, speakers };
+                        })
+                      }
+                      aria-label="Добавить тег"
+                    >
+                      + тег
+                    </button>
+                  )}
                 </div>
+                {isAdmin && (
+                  <div className={styles.inlineControls}>
+                    <button
+                      type="button"
+                      className={styles.controlButton}
+                      onClick={() =>
+                        setContentState((prev) => {
+                          const speakers = prev.speakers.length === 1
+                            ? [createEmptySpeaker()]
+                            : prev.speakers.filter((_, idx) => idx !== speakerIndex);
+                          return { ...prev, speakers };
+                        })
+                      }
+                      aria-label="Удалить спикера"
+                    >
+                      −
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
+            {isAdmin && (
+              <button
+                type="button"
+                className={`${styles.controlButton} ${styles.addCardButton}`}
+                onClick={() =>
+                  setContentState((prev) => ({
+                    ...prev,
+                    speakers: [...prev.speakers, createEmptySpeaker()],
+                  }))
+                }
+                aria-label="Добавить спикера"
+              >
+                + Добавить спикера
+              </button>
+            )}
           </div>
         </section>
 
         <section className={styles.section} id="pricing">
           <h2 className={styles.sectionHeading}>Стоимость участия</h2>
           <div className={styles.pricingGrid}>
-            {pricing.map((option) => (
+            {pricingOptions.map((option, optionIndex) => (
               <div
-                key={option.period}
+                key={`${option.period}-${optionIndex}`}
                 className={`${styles.priceCard} ${option.highlight ? styles.highlight : ""}`}
               >
-                {option.label && <span className={styles.priceBadge}>{option.label}</span>}
-                <span className={styles.pricePeriod}>{option.period}</span>
-                <span className={styles.priceValue}>{option.price}</span>
+                {(option.label || isAdmin) && (
+                  <EditableText
+                    tag="span"
+                    value={option.label ?? ""}
+                    canEdit={isAdmin}
+                    className={styles.priceBadge}
+                    onChange={(nextValue) =>
+                      setContentState((prev) => {
+                        const pricingOptions = prev.pricingOptions.map((item, index) =>
+                          index === optionIndex ? { ...item, label: nextValue || undefined } : item,
+                        );
+                        return { ...prev, pricingOptions };
+                      })
+                    }
+                  />
+                )}
+                <EditableText
+                  tag="span"
+                  value={option.period}
+                  canEdit={isAdmin}
+                  className={styles.pricePeriod}
+                  onChange={(nextValue) =>
+                    setContentState((prev) => {
+                      const pricingOptions = prev.pricingOptions.map((item, index) =>
+                        index === optionIndex ? { ...item, period: nextValue } : item,
+                      );
+                      return { ...prev, pricingOptions };
+                    })
+                  }
+                />
+                <EditableText
+                  tag="span"
+                  value={option.price}
+                  canEdit={isAdmin}
+                  className={styles.priceValue}
+                  onChange={(nextValue) =>
+                    setContentState((prev) => {
+                      const pricingOptions = prev.pricingOptions.map((item, index) =>
+                        index === optionIndex ? { ...item, price: nextValue } : item,
+                      );
+                      return { ...prev, pricingOptions };
+                    })
+                  }
+                />
                 <div className={styles.priceFeatures}>
-                  {option.features.map((feature) => (
-                    <span key={feature}>• {feature}</span>
+                  {option.features.map((feature, featureIndex) => (
+                    <div key={`${feature}-${featureIndex}`} className={styles.featureRow}>
+                      <EditableText
+                        tag="span"
+                        value={`• ${feature}`}
+                        canEdit={isAdmin}
+                        className={styles.priceFeature}
+                        onChange={(nextValue) =>
+                          setContentState((prev) => {
+                            const pricingOptions = prev.pricingOptions.map((item, index) => {
+                              if (index !== optionIndex) return item;
+                              const cleaned = nextValue.replace(/^•\s*/, "");
+                              const features = item.features.map((f, idx) => (idx === featureIndex ? cleaned : f));
+                              return { ...item, features };
+                            });
+                            return { ...prev, pricingOptions };
+                          })
+                        }
+                      />
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          className={styles.controlButton}
+                          onClick={() =>
+                            setContentState((prev) => {
+                              const pricingOptions = prev.pricingOptions.map((item, index) => {
+                                if (index !== optionIndex) return item;
+                                const features = item.features.filter((_, idx) => idx !== featureIndex);
+                                return { ...item, features: features.length ? features : ["Новое преимущество"] };
+                              });
+                              return { ...prev, pricingOptions };
+                            })
+                          }
+                          aria-label="Удалить преимущество"
+                        >
+                          −
+                        </button>
+                      )}
+                    </div>
                   ))}
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className={`${styles.controlButton} ${styles.addButton}`}
+                      onClick={() =>
+                        setContentState((prev) => {
+                          const pricingOptions = prev.pricingOptions.map((item, index) =>
+                            index === optionIndex
+                              ? { ...item, features: [...item.features, "Новое преимущество"] }
+                              : item,
+                          );
+                          return { ...prev, pricingOptions };
+                        })
+                      }
+                      aria-label="Добавить преимущество"
+                    >
+                      +
+                    </button>
+                  )}
                 </div>
+                {isAdmin && (
+                  <div className={styles.inlineControls}>
+                    <button
+                      type="button"
+                      className={styles.controlButton}
+                      onClick={() =>
+                        setContentState((prev) => {
+                          const pricingOptions = prev.pricingOptions.length === 1
+                            ? [createEmptyPricingOption()]
+                            : prev.pricingOptions.filter((_, idx) => idx !== optionIndex);
+                          return { ...prev, pricingOptions };
+                        })
+                      }
+                      aria-label="Удалить тариф"
+                    >
+                      −
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
+          {isAdmin && (
+            <button
+              type="button"
+              className={`${styles.controlButton} ${styles.addCardButton}`}
+              onClick={() =>
+                setContentState((prev) => ({
+                  ...prev,
+                  pricingOptions: [...prev.pricingOptions, createEmptyPricingOption()],
+                }))
+              }
+              aria-label="Добавить тариф"
+            >
+              + Добавить тариф
+            </button>
+          )}
           <div className={styles.pricingDiscount}>
-            <p className={styles.pricingDiscountTitle}>Скидка для участников программ МГИ</p>
-            <p className={styles.pricingDiscountText}>
-              Скидка 1000₽ для всех, кто проходит или проходил обучение в Московском гештальт институте. Укажите это при регистрации.
-            </p>
+            <EditableText
+              tag="p"
+              value={discountTitle}
+              canEdit={isAdmin}
+              className={styles.pricingDiscountTitle}
+              onChange={(nextValue) =>
+                setContentState((prev) => ({
+                  ...prev,
+                  discountTitle: nextValue,
+                }))
+              }
+            />
+            <EditableText
+              tag="p"
+              value={discountText}
+              canEdit={isAdmin}
+              className={styles.pricingDiscountText}
+              onChange={(nextValue) =>
+                setContentState((prev) => ({
+                  ...prev,
+                  discountText: nextValue,
+                }))
+              }
+            />
           </div>
         </section>
 
@@ -393,8 +869,67 @@ export default function Home() {
             <p>©2025 Московский гештальт институт.</p>
             <p>Время работы: Пн-Пг 10:00-18:00 МСК.</p>
           </div>
+          <div className={styles.footerActions}>
+            {!isAdmin ? (
+              <button type="button" className={styles.loginButton} onClick={handleOpenLogin}>
+                Войти как администратор
+              </button>
+            ) : (
+              <button type="button" className={styles.loginButton} onClick={handleLogout}>
+                Выйти
+              </button>
+            )}
+          </div>
         </div>
       </footer>
+
+      {isLoginModalOpen && (
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true">
+          <div className={styles.modalContent}>
+            <button
+              type="button"
+              className={styles.modalClose}
+              aria-label="Закрыть"
+              onClick={handleCloseLogin}
+            >
+              ×
+            </button>
+            <h3 className={styles.modalTitle}>Вход администратора</h3>
+            <form className={styles.modalForm} onSubmit={handleLoginSubmit}>
+              <label className={styles.modalLabel}>
+                Логин
+                <input
+                  type="text"
+                  value={login}
+                  className={styles.modalInput}
+                  onChange={(event) => setLogin(event.target.value)}
+                  autoFocus
+                />
+              </label>
+              <label className={styles.modalLabel}>
+                Пароль
+                <input
+                  type="password"
+                  value={password}
+                  className={styles.modalInput}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+              </label>
+              {loginError && <div className={styles.modalError}>{loginError}</div>}
+              <button type="submit" className={styles.modalSubmit}>
+                Войти
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+      {status !== "idle" && (
+        <div className={styles.toast}>
+          {status === "loading" && "Загрузка данных..."}
+          {status === "saving" && "Сохранение..."}
+          {status === "error" && (error ?? "Произошла ошибка")}
+        </div>
+      )}
     </div>
   );
 }
