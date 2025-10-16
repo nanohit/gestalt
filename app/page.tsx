@@ -1,28 +1,28 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { createElement, useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent, Ref } from "react";
 import Image from "next/image";
 import styles from "./page.module.css";
 import { createEmptyDay, createEmptyPricingOption, createEmptySession, createEmptySpeaker } from "@/app/lib/content";
 import { useSiteContent } from "@/app/hooks/useSiteContent";
 
-type EditableTextProps<T extends keyof React.JSX.IntrinsicElements> = {
-  tag?: T;
+type EditableTextProps = {
+  tag?: keyof React.JSX.IntrinsicElements;
   value: string;
   canEdit: boolean;
   className?: string;
   onChange: (value: string) => void;
 };
 
-function EditableText<T extends keyof React.JSX.IntrinsicElements = "span">({
-  tag,
+function EditableText({
+  tag = "span",
   value,
   canEdit,
   className,
   onChange,
-}: EditableTextProps<T>) {
-  const Tag = (tag ?? "span") as T;
+}: EditableTextProps) {
+  const Tag = tag;
   const [isEditing, setIsEditing] = useState(false);
   const [initialValue, setInitialValue] = useState(value);
   const elementRef = useRef<HTMLElement | null>(null);
@@ -111,23 +111,23 @@ function EditableText<T extends keyof React.JSX.IntrinsicElements = "span">({
     [value],
   );
 
-  return (
-    <Tag
-      ref={refCallback as unknown as Ref<any>}
-      className={`${className ?? ""} ${canEdit ? styles.editable : ""} ${
+  return createElement(
+    tag ?? "span",
+    {
+      ref: refCallback as unknown as Ref<any>,
+      className: `${className ?? ""} ${canEdit ? styles.editable : ""} ${
         isEditing ? styles.editing : ""
-      }`}
-      contentEditable={isEditing}
-      suppressContentEditableWarning
-      onClick={enableEditing}
-      onBlur={handleBlur}
-      onKeyDown={handleKeyDown}
-      role={canEdit ? "textbox" : undefined}
-      aria-label={canEdit ? "Редактируемый текст" : undefined}
-      tabIndex={canEdit ? 0 : undefined}
-    >
-      {value}
-    </Tag>
+      }`,
+      contentEditable: isEditing,
+      suppressContentEditableWarning: true,
+      onClick: enableEditing,
+      onBlur: handleBlur,
+      onKeyDown: handleKeyDown,
+      role: canEdit ? "textbox" : undefined,
+      "aria-label": canEdit ? "Редактируемый текст" : undefined,
+      tabIndex: canEdit ? 0 : undefined,
+    },
+    value,
   );
 }
 
