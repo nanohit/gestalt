@@ -34,6 +34,18 @@
   gap: 16px;
 }
 
+.logoImage,
+.logoImageMobile {
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  max-height: 116px;
+}
+
+.logoImageMobile {
+  max-height: 66px;
+}
+
 .nav {
   display: flex;
   align-items: center;
@@ -93,6 +105,7 @@
   gap: 0px;
   margin-bottom: 37px;
   margin-top: -50px;
+  align-items: center;
 }
 
 .hero::before {
@@ -126,12 +139,15 @@
   letter-spacing: 0.05em;
 }
 
-.heroSubheading {
-  font-size: 22px;
-  color: #54717f;
-  line-height: 1.4;
-  margin-top: 18px;
+.heroSubheadingMatch {
+  font-size: 26px;
+  color: #0aa5b5;
+  font-weight: 600;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
+
 
 .heroActions {
   display: flex;
@@ -360,11 +376,51 @@
   transform: translateY(-8px);
 }
 
-.speakerPhoto {
+.speakerPhotoWrapper {
+  position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
   border-radius: 24px;
+  overflow: hidden;
   background: linear-gradient(180deg, #eef4f7 0%, #d3e2e9 100%);
+}
+
+.speakerPhotoImage {
+  object-fit: cover;
+}
+
+.speakerPhotoPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #6aaab5;
+}
+
+.speakerPhotoUpload {
+  position: absolute;
+  inset: auto 12px 12px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s ease;
+}
+
+.speakerPhotoUpload input {
+  display: none;
+}
+
+.speakerPhotoUpload:hover {
+  background: rgba(0, 0, 0, 0.68);
 }
 
 .speakerName {
@@ -575,11 +631,21 @@
   margin-bottom: 20px;
 }
 
+
 .registrationNotificationsList {
   font-size: 20px;
   color: #000000;
   line-height: 1.6;
   font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notificationRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .registrationNotificationsList p {
@@ -610,6 +676,22 @@
   flex-direction: column;
   gap: 12px;
   align-items: center;
+}
+
+.contactLink {
+  text-decoration: none;
+}
+
+.contactLink:focus-visible {
+  outline: 2px solid rgba(16, 196, 216, 0.6);
+  border-radius: 12px;
+}
+
+.contactText {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
 }
 
 .contactItem {
@@ -941,6 +1023,10 @@
     font-size: 18px;
   }
 
+  .heroSubheadingMatch {
+    font-size: 18px;
+  }
+
   .heroHeading {
     font-size: 36px;
   }
@@ -1056,6 +1142,10 @@
 
   .heroHeading {
     font-size: 30px;
+  }
+
+  .heroSubheadingMatch {
+    font-size: 16px;
   }
 
   .heroButtonPrimary,

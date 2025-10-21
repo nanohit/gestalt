@@ -7,6 +7,8 @@ import styles from "./page.module.css";
 import { createEmptyDay, createEmptyPricingOption, createEmptySession, createEmptySpeaker } from "@/app/lib/content";
 import { useSiteContent } from "@/app/hooks/useSiteContent";
 
+const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY ?? "dea282c8a3ed6b4d82eed4ea65ab3826";
+
 type EditableTextProps = {
   tag?: keyof React.JSX.IntrinsicElements;
   value: string;
@@ -138,7 +140,22 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const { content, status, error, setContentState, reload } = useSiteContent(isAdmin);
-  const { programDays, speakers: speakerItems, pricingOptions, discountTitle, discountText } = content;
+  const {
+    programDays,
+    speakers: speakerItems,
+    pricingOptions,
+    registrationNotifications,
+    contactSection,
+  } = content;
+
+  const cleanedPhone = contactSection.phone.replace(/[^\d+]/g, "");
+  const phoneHref = cleanedPhone ? `tel:${cleanedPhone}` : undefined;
+  const emailHref = contactSection.email ? `mailto:${contactSection.email}` : undefined;
+  const websiteHref = contactSection.website
+    ? contactSection.website.startsWith("http://") || contactSection.website.startsWith("https://")
+      ? contactSection.website
+      : `https://${contactSection.website}`
+    : undefined;
 
   const scrollToElement = (element: HTMLElement | null) => {
     if (!element) return;
@@ -192,8 +209,22 @@ export default function Home() {
       <header className={styles.header}>
         <div className={styles.headerContainer}>
           <div className={styles.logoWrapper}>
-            <Image src="/logo1.png" alt="Логотип 1" width={200} height={100} />
-            <Image src="/logo2.png" alt="Логотип 2" width={200} height={110} />
+            <Image
+              src="/logo1.png"
+              alt="Логотип 1"
+              width={120}
+              height={60}
+              className={styles.logoImage}
+              priority
+            />
+            <Image
+              src="/logo2.png"
+              alt="Логотип 2"
+              width={120}
+              height={66}
+              className={styles.logoImage}
+              priority
+            />
           </div>
           <nav className={styles.nav}>
             <button type="button" onClick={handleScrollToProgram}>
@@ -223,18 +254,32 @@ export default function Home() {
       <div className={styles.container}>
         <section className={styles.hero}>
           <div className={styles.mobileLogos}>
-            <Image src="/logo1.png" alt="Логотип 1" width={180} height={90} style={{ objectFit: 'contain' }} />
-            <Image src="/logo2.png" alt="Логотип 2" width={180} height={99} style={{ objectFit: 'contain' }} />
+            <Image
+              src="/logo1.png"
+              alt="Логотип 1"
+              width={120}
+              height={60}
+              className={styles.logoImageMobile}
+              priority
+            />
+            <Image
+              src="/logo2.png"
+              alt="Логотип 2"
+              width={120}
+              height={66}
+              className={styles.logoImageMobile}
+              priority
+            />
           </div>
           <div className={styles.heroInner}>
             <div>
-              <p className={styles.heroConferenceLabel}>Конференция:</p>
+              <p className={styles.heroConferenceLabel}>Конференция</p>
               <h1 className={styles.heroHeading}>
                 Актуальные вопросы
                 <br />
-                гештальт терапии
+                гештальт-терапии
               </h1>
-              <p className={styles.heroSubheading}>
+              <p className={styles.heroSubheadingMatch}>
                 Терапевтическая практика.
                 <br />
                 Современные реалии.
@@ -469,7 +514,63 @@ export default function Home() {
           <div className={styles.speakersGrid}>
             {speakerItems.map((speaker, speakerIndex) => (
               <div key={`${speaker.name}-${speakerIndex}`} className={styles.speakerCard}>
-                <div className={styles.speakerPhoto} />
+                <div className={styles.speakerPhotoWrapper}>
+                  {speaker.photoUrl ? (
+                    <Image
+                      src={speaker.photoUrl}
+                      alt={speaker.name}
+                      fill
+                      sizes="(max-width: 900px) 100vw, 1fr"
+                      className={styles.speakerPhotoImage}
+                    />
+                  ) : (
+                    <div className={styles.speakerPhotoPlaceholder}>Фото</div>
+                  )}
+                  {isAdmin && (
+                    <label className={styles.speakerPhotoUpload}>
+                      Заменить фото
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (event) => {
+                          const file = event.target.files?.[0];
+                          if (!file) return;
+                          const formData = new FormData();
+                          formData.append("image", file);
+                          try {
+                            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                              method: "POST",
+                              body: formData,
+                            });
+                            const payload = (await response.json()) as {
+                              success: boolean;
+                              data?: { url: string };
+                              error?: { message: string };
+                            };
+                            if (!payload.success || !payload.data?.url) {
+                              throw new Error(payload.error?.message || "Не удалось загрузить изображение");
+                            }
+                            setContentState((prev) => {
+                              const speakers = prev.speakers.map((item, index) =>
+                                index === speakerIndex ? { ...item, photoUrl: payload.data!.url } : item,
+                              );
+                              return { ...prev, speakers };
+                            });
+                          } catch (err) {
+                            console.error("Failed to upload speaker photo", err);
+                            alert(
+                              err instanceof Error
+                                ? err.message
+                                : "Не удалось загрузить изображение. Попробуйте позже.",
+                            );
+                          } finally {
+                            event.target.value = "";
+                          }
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
                 <div>
                   <EditableText
                     tag="div"
@@ -775,32 +876,6 @@ export default function Home() {
               + Добавить тариф
             </button>
           )}
-          <div className={styles.pricingDiscount}>
-            <EditableText
-              tag="p"
-              value={discountTitle}
-              canEdit={isAdmin}
-              className={styles.pricingDiscountTitle}
-              onChange={(nextValue) =>
-                setContentState((prev) => ({
-                  ...prev,
-                  discountTitle: nextValue,
-                }))
-              }
-            />
-            <EditableText
-              tag="p"
-              value={discountText}
-              canEdit={isAdmin}
-              className={styles.pricingDiscountText}
-              onChange={(nextValue) =>
-                setContentState((prev) => ({
-                  ...prev,
-                  discountText: nextValue,
-                }))
-              }
-            />
-          </div>
         </section>
 
         <section className={styles.section} id="registration">
@@ -809,21 +884,21 @@ export default function Home() {
             <div className={styles.registrationStep}>
               <div className={styles.registrationStepHeader}>
                 <span className={styles.registrationStepNumber}>1</span>
-                <span>Заполните форму регистрации с вашими контактными данными.</span>
+                <span>Заполните форму регистрации с вашими контактными данными</span>
               </div>
             </div>
             <div className={styles.registrationStep}>
               <div className={styles.registrationStepHeader}>
                 <span className={styles.registrationStepNumber}>2</span>
                 <span>
-                  Оплатите участие по реквизитам, полученным на email, который вы указали при регистрации.
+                  Оплатите участие по реквизитам, полученным на email, который вы указали при регистрации
                 </span>
               </div>
             </div>
             <div className={styles.registrationStep}>
               <div className={styles.registrationStepHeader}>
                 <span className={styles.registrationStepNumber}>3</span>
-                <span>После подтверждения оплаты получите ссылку на Zoom.</span>
+                <span>После подтверждения оплаты получите ссылку на Zoom</span>
               </div>
             </div>
           </div>
@@ -838,26 +913,182 @@ export default function Home() {
             </a>
           </div>
           <div className={styles.registrationNotifications}>
-            <h3 className={styles.registrationNotificationsTitle}>Автоматические уведомления:</h3>
+            <EditableText
+              tag="h3"
+              value={registrationNotifications.title}
+              canEdit={isAdmin}
+              className={styles.registrationNotificationsTitle}
+              onChange={(nextValue) =>
+                setContentState((prev) => ({
+                  ...prev,
+                  registrationNotifications: {
+                    ...prev.registrationNotifications,
+                    title: nextValue,
+                  },
+                }))
+              }
+            />
             <div className={styles.registrationNotificationsList}>
-              <p>• Подтверждение регистрации приходит сразу после заполнения формы.</p>
-              <p>• Подтверждение оплаты и ссылка на Zoom — после поступления оплаты.</p>
-              <p>• Напоминание и ссылка — за день до начала конференции</p>
+              {registrationNotifications.items.map((item, index) => (
+                <div key={`${item}-${index}`} className={styles.notificationRow}>
+                  <EditableText
+                    tag="p"
+                    value={`• ${item}`}
+                    canEdit={isAdmin}
+                    onChange={(nextValue) =>
+                      setContentState((prev) => {
+                        const cleaned = nextValue.replace(/^•\s*/, "");
+                        const items = prev.registrationNotifications.items.map((entry, idx) =>
+                          idx === index ? cleaned : entry,
+                        );
+                        return {
+                          ...prev,
+                          registrationNotifications: {
+                            ...prev.registrationNotifications,
+                            items,
+                          },
+                        };
+                      })
+                    }
+                  />
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className={styles.controlButton}
+                      onClick={() =>
+                        setContentState((prev) => {
+                          const items = prev.registrationNotifications.items.filter((_, idx) => idx !== index);
+                          return {
+                            ...prev,
+                            registrationNotifications: {
+                              ...prev.registrationNotifications,
+                              items: items.length ? items : ["Новый пункт"],
+                            },
+                          };
+                        })
+                      }
+                      aria-label="Удалить уведомление"
+                    >
+                      −
+                    </button>
+                  )}
+                </div>
+              ))}
+              {isAdmin && (
+                <button
+                  type="button"
+                  className={`${styles.controlButton} ${styles.addButton}`}
+                  onClick={() =>
+                    setContentState((prev) => ({
+                      ...prev,
+                      registrationNotifications: {
+                        ...prev.registrationNotifications,
+                        items: [...prev.registrationNotifications.items, "Новый пункт"],
+                      },
+                    }))
+                  }
+                  aria-label="Добавить уведомление"
+                >
+                  +
+                </button>
+              )}
             </div>
           </div>
           
           <div className={styles.contactSection}>
-            <h3 className={styles.contactSectionTitle}>Контакты организаторов</h3>
+            <EditableText
+              tag="h3"
+              value={contactSection.title}
+              canEdit={isAdmin}
+              className={styles.contactSectionTitle}
+              onChange={(nextValue) =>
+                setContentState((prev) => ({
+                  ...prev,
+                  contactSection: {
+                    ...prev.contactSection,
+                    title: nextValue,
+                  },
+                }))
+              }
+            />
             <div className={styles.contactInfo}>
-              <div className={styles.contactItem}>
-                <span className={styles.contactPhone}>+7 495 123-45-67</span>
-              </div>
-              <div className={styles.contactItem}>
-                <a href="mailto:info@gestalt.ru" className={styles.contactEmail}>info@gestalt.ru</a>
-              </div>
-              <div className={styles.contactItem}>
-                <a href="https://gestalt.ru" target="_blank" rel="noopener noreferrer" className={styles.contactWebsite}>gestalt.ru</a>
-              </div>
+              <a
+                href={phoneHref || undefined}
+                className={`${styles.contactItem} ${styles.contactLink}`}
+                onClick={(event) => {
+                  if (isAdmin) {
+                    event.preventDefault();
+                  }
+                }}
+              >
+                <EditableText
+                  tag="span"
+                  value={contactSection.phone}
+                  canEdit={isAdmin}
+                  className={`${styles.contactText} ${styles.contactPhone}`}
+                  onChange={(nextValue) =>
+                    setContentState((prev) => ({
+                      ...prev,
+                      contactSection: {
+                        ...prev.contactSection,
+                        phone: nextValue,
+                      },
+                    }))
+                  }
+                />
+              </a>
+              <a
+                href={emailHref || undefined}
+                className={`${styles.contactItem} ${styles.contactLink}`}
+                onClick={(event) => {
+                  if (isAdmin) {
+                    event.preventDefault();
+                  }
+                }}
+              >
+                <EditableText
+                  tag="span"
+                  value={contactSection.email}
+                  canEdit={isAdmin}
+                  className={`${styles.contactText} ${styles.contactEmail}`}
+                  onChange={(nextValue) =>
+                    setContentState((prev) => ({
+                      ...prev,
+                      contactSection: {
+                        ...prev.contactSection,
+                        email: nextValue,
+                      },
+                    }))
+                  }
+                />
+              </a>
+              <a
+                href={websiteHref || undefined}
+                className={`${styles.contactItem} ${styles.contactLink}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => {
+                  if (isAdmin) {
+                    event.preventDefault();
+                  }
+                }}
+              >
+                <EditableText
+                  tag="span"
+                  value={contactSection.website}
+                  canEdit={isAdmin}
+                  className={`${styles.contactText} ${styles.contactWebsite}`}
+                  onChange={(nextValue) =>
+                    setContentState((prev) => ({
+                      ...prev,
+                      contactSection: {
+                        ...prev.contactSection,
+                        website: nextValue,
+                      },
+                    }))
+                  }
+                />
+              </a>
             </div>
           </div>
         </section>
@@ -866,8 +1097,7 @@ export default function Home() {
       <footer className={styles.footer}>
         <div className={styles.footerContainer}>
           <div className={styles.footerContent}>
-            <p>©2025 Московский гештальт институт.</p>
-            <p>Время работы: Пн-Пг 10:00-18:00 МСК.</p>
+            <p>Конференция: Актуальные вопросы гештальт-терапии</p>
           </div>
           <div className={styles.footerActions}>
             {!isAdmin ? (

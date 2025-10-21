@@ -3,7 +3,7 @@ import "./globals.css";
 import ViewportScaler from "./ViewportScaler";
 
 export const metadata: Metadata = {
-  title: "Актуальные вопросы гештальт терапии. Конференция.",
+  title: "Актуальные вопросы гештальт-терапии. Конференция.",
   description: "Конференция по актуальным вопросам гештальт терапии. Терапевтическая практика. Современные реалии.",
 };
 

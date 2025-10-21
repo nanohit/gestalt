@@ -24,6 +24,7 @@ const speakerSchema = z.object({
   experience: z.string().min(1),
   description: z.string().min(1),
   tags: z.array(z.string().min(1)).min(1),
+  photoUrl: z.string().url().or(z.literal("")),
 });
 
 const pricingSchema = z.object({
@@ -38,8 +39,16 @@ const siteContentSchema = z.object({
   programDays: z.array(daySchema).min(1),
   speakers: z.array(speakerSchema).min(1),
   pricingOptions: z.array(pricingSchema).min(1),
-  discountTitle: z.string().min(1),
-  discountText: z.string().min(1),
+  registrationNotifications: z.object({
+    title: z.string().min(1),
+    items: z.array(z.string().min(1)).min(1),
+  }),
+  contactSection: z.object({
+    title: z.string().min(1),
+    phone: z.string().min(1),
+    email: z.string().min(1),
+    website: z.string().min(1),
+  }),
 });
 
 type SiteContentInput = z.infer<typeof siteContentSchema>;

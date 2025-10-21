@@ -16,6 +16,7 @@ export type Speaker = {
   experience: string;
   description: string;
   tags: string[];
+  photoUrl: string;
 };
 
 export type PricingOption = {
@@ -26,12 +27,24 @@ export type PricingOption = {
   highlight?: boolean;
 };
 
+export type RegistrationNotifications = {
+  title: string;
+  items: string[];
+};
+
+export type ContactSection = {
+  title: string;
+  phone: string;
+  email: string;
+  website: string;
+};
+
 export type SiteContent = {
   programDays: ProgramDay[];
   speakers: Speaker[];
   pricingOptions: PricingOption[];
-  discountTitle: string;
-  discountText: string;
+  registrationNotifications: RegistrationNotifications;
+  contactSection: ContactSection;
 };
 
 export function cloneSiteContent(content: SiteContent): SiteContent {
@@ -51,6 +64,7 @@ export function cloneSiteContent(content: SiteContent): SiteContent {
       experience: speaker.experience,
       description: speaker.description,
       tags: [...speaker.tags],
+      photoUrl: speaker.photoUrl,
     })),
     pricingOptions: content.pricingOptions.map((option) => ({
       label: option.label,
@@ -59,8 +73,16 @@ export function cloneSiteContent(content: SiteContent): SiteContent {
       features: [...option.features],
       highlight: option.highlight,
     })),
-    discountTitle: content.discountTitle,
-    discountText: content.discountText,
+    registrationNotifications: {
+      title: content.registrationNotifications.title,
+      items: [...content.registrationNotifications.items],
+    },
+    contactSection: {
+      title: content.contactSection.title,
+      phone: content.contactSection.phone,
+      email: content.contactSection.email,
+      website: content.contactSection.website,
+    },
   };
 }
 
@@ -82,6 +104,7 @@ export const createEmptySpeaker = (): Speaker => ({
   experience: "Опыт",
   description: "Описание спикера",
   tags: ["Новый тег"],
+  photoUrl: "",
 });
 
 export const createEmptyPricingOption = (): PricingOption => ({
@@ -172,6 +195,7 @@ export const RAW_DEFAULT_CONTENT: SiteContent = {
       description:
         "Специалист по работе с терапевтическим опытом. Автор публикаций по современным подходам в гештальт-терапии.",
       tags: ["Контакт", "Поддержка", "Травма и восстановление"],
+      photoUrl: "",
     },
     {
       name: "Михаил Иванов",
@@ -180,6 +204,7 @@ export const RAW_DEFAULT_CONTENT: SiteContent = {
       description:
         "Эксперт в области групповых процессов и полевых феноменов. Ведущий программ подготовки терапевтов.",
       tags: ["Супервизия", "Обучение", "Групповая терапия"],
+      photoUrl: "",
     },
     {
       name: "Дмитрий Козлов",
@@ -188,6 +213,7 @@ export const RAW_DEFAULT_CONTENT: SiteContent = {
       description:
         "Специалист по работе с травматическим опытом. Автор публикаций по современным подходам в гештальт-терапии.",
       tags: ["Философия", "Современность", "Этика терапии"],
+      photoUrl: "",
     },
     {
       name: "Елена Смирнова",
@@ -196,6 +222,7 @@ export const RAW_DEFAULT_CONTENT: SiteContent = {
       description:
         "Пионер в области онлайн гештальт-терапии. Исследователь цифровых особенностей контакта в цифровом пространстве.",
       tags: ["Контакт", "Онлайн-практика", "Интеграция"],
+      photoUrl: "",
     },
   ],
   pricingOptions: [
@@ -234,9 +261,20 @@ export const RAW_DEFAULT_CONTENT: SiteContent = {
       highlight: false,
     },
   ],
-  discountTitle: "Скидка для участников программ МГИ",
-  discountText:
-    "Скидка 1000₽ для всех, кто проходит или проходил обучение в Московском гештальт институте. Укажите это при регистрации.",
+  registrationNotifications: {
+    title: "Автоматические уведомления:",
+    items: [
+      "Подтверждение регистрации приходит сразу после заполнения формы.",
+      "Подтверждение оплаты и ссылка на Zoom — после поступления оплаты.",
+      "Напоминание и ссылка — за день до начала конференции.",
+    ],
+  },
+  contactSection: {
+    title: "Контакты организаторов",
+    phone: "+7 495 123-45-67",
+    email: "info@gestalt.ru",
+    website: "https://gestalt.ru",
+  },
 };
 
 export const defaultContent: SiteContent = cloneSiteContent(RAW_DEFAULT_CONTENT);
@@ -251,6 +289,8 @@ export function normalizeContent(input: Partial<SiteContent> | null | undefined)
   const emptyDay = createEmptyDay();
   const emptySpeaker = createEmptySpeaker();
   const emptyPricing = createEmptyPricingOption();
+  const notificationsFallback = fallback.registrationNotifications;
+  const contactFallback = fallback.contactSection;
 
   const programDays =
     Array.isArray(input.programDays) && input.programDays.length
@@ -286,6 +326,7 @@ export function normalizeContent(input: Partial<SiteContent> | null | undefined)
             experience: rawSpeaker?.experience?.trim() || emptySpeaker.experience,
             description: rawSpeaker?.description?.trim() || emptySpeaker.description,
             tags,
+            photoUrl: rawSpeaker?.photoUrl?.trim() || emptySpeaker.photoUrl,
           };
         })
       : fallback.speakers;
@@ -308,14 +349,28 @@ export function normalizeContent(input: Partial<SiteContent> | null | undefined)
         })
       : fallback.pricingOptions;
 
-  const discountTitle = input.discountTitle?.trim() || fallback.discountTitle;
-  const discountText = input.discountText?.trim() || fallback.discountText;
+  const registrationItems =
+    Array.isArray(input.registrationNotifications?.items) && input.registrationNotifications?.items.length
+      ? input.registrationNotifications.items.map((item) => item?.trim()).filter(Boolean)
+      : [...notificationsFallback.items];
+
+  const registrationNotifications = {
+    title: input.registrationNotifications?.title?.trim() || notificationsFallback.title,
+    items: registrationItems.length ? registrationItems : [...notificationsFallback.items],
+  };
+
+  const contactSection = {
+    title: input.contactSection?.title?.trim() || contactFallback.title,
+    phone: input.contactSection?.phone?.trim() || contactFallback.phone,
+    email: input.contactSection?.email?.trim() || contactFallback.email,
+    website: input.contactSection?.website?.trim() || contactFallback.website,
+  };
 
   return {
     programDays,
     speakers,
     pricingOptions,
-    discountTitle,
-    discountText,
+    registrationNotifications,
+    contactSection,
   };
 }
