@@ -904,7 +904,7 @@ export default function Home() {
           </div>
           <div className={styles.registrationButtonContainer}>
             <a 
-              href="https://docs.google.com/forms/d/e/1FAIpQLScfVd6cwN_jouQnH_PvdA1a98fBcegP3Jb_VCfrJ8YgHamxhQ/viewform?usp=header"
+              href="https://forms.gle/6DKLwvSLYGK5oMA3A"
           target="_blank"
           rel="noopener noreferrer"
               className={styles.registrationButton}
