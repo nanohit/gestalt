@@ -151,12 +151,6 @@ export default function Home() {
   const cleanedPhone = contactSection.phone.replace(/[^\d+]/g, "");
   const phoneHref = cleanedPhone ? `tel:${cleanedPhone}` : undefined;
   const emailHref = contactSection.email ? `mailto:${contactSection.email}` : undefined;
-  const websiteHref = contactSection.website
-    ? contactSection.website.startsWith("http://") || contactSection.website.startsWith("https://")
-      ? contactSection.website
-      : `https://${contactSection.website}`
-    : undefined;
-
   const scrollToElement = (element: HTMLElement | null) => {
     if (!element) return;
     element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -273,7 +267,10 @@ export default function Home() {
           </div>
           <div className={styles.heroInner}>
             <div>
-              <p className={styles.heroConferenceLabel}>Конференция</p>
+              <p className={styles.heroConferenceLabel}>
+                Конференция
+                <span className={styles.heroConferenceOnline}>Онлайн</span>
+              </p>
               <h1 className={styles.heroHeading}>
                 Актуальные вопросы
                 <br />
@@ -282,7 +279,7 @@ export default function Home() {
               <p className={styles.heroSubheadingMatch}>
                 Терапевтическая практика.
                 <br />
-                Современные реалии.
+                Современные реалии
               </p>
             </div>
             <div className={styles.heroActions}>
@@ -890,8 +887,10 @@ export default function Home() {
             <div className={styles.registrationStep}>
               <div className={styles.registrationStepHeader}>
                 <span className={styles.registrationStepNumber}>2</span>
-                <span>
-                  Оплатите участие по реквизитам, полученным на email, который вы указали при регистрации
+                <span className={styles.registrationStepTextEmphasis}>
+                  Оплатите участие по реквизитам, полученным
+                  <br />
+                  на email/телефон, который вы указали при регистрации
                 </span>
               </div>
             </div>
@@ -1062,33 +1061,6 @@ export default function Home() {
                   }
                 />
               </a>
-              <a
-                href={websiteHref || undefined}
-                className={`${styles.contactItem} ${styles.contactLink}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(event) => {
-                  if (isAdmin) {
-                    event.preventDefault();
-                  }
-                }}
-              >
-                <EditableText
-                  tag="span"
-                  value={contactSection.website}
-                  canEdit={isAdmin}
-                  className={`${styles.contactText} ${styles.contactWebsite}`}
-                  onChange={(nextValue) =>
-                    setContentState((prev) => ({
-                      ...prev,
-                      contactSection: {
-                        ...prev.contactSection,
-                        website: nextValue,
-                      },
-                    }))
-                  }
-                />
-              </a>
             </div>
           </div>
         </section>
@@ -1110,6 +1082,7 @@ export default function Home() {
               </button>
             )}
           </div>
+          <p className={styles.footerNote}>2025 Все права защищены.</p>
         </div>
       </footer>
 
