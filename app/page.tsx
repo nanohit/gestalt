@@ -1,145 +1,30 @@
-'use client';
+"use client";
 
-import { createElement, useCallback, useEffect, useRef, useState } from "react";
-import type { FormEvent, KeyboardEvent, Ref } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./page.module.css";
 import { createEmptyDay, createEmptyPricingOption, createEmptySession, createEmptySpeaker } from "@/app/lib/content";
 import { useSiteContent } from "@/app/hooks/useSiteContent";
+import { useAdminAuth } from "@/app/hooks/useAdminAuth";
+import EditableText from "@/app/components/EditableText";
 
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY ?? "dea282c8a3ed6b4d82eed4ea65ab3826";
 
-type EditableTextProps = {
-  tag?: keyof React.JSX.IntrinsicElements;
-  value: string;
-  canEdit: boolean;
-  className?: string;
-  onChange: (value: string) => void;
-};
-
-function EditableText({
-  tag = "span",
-  value,
-  canEdit,
-  className,
-  onChange,
-}: EditableTextProps) {
-  const Tag = tag;
-  const [isEditing, setIsEditing] = useState(false);
-  const [initialValue, setInitialValue] = useState(value);
-  const elementRef = useRef<HTMLElement | null>(null);
-  const cancelRef = useRef(false);
-  const isEditingRef = useRef(isEditing);
-
-  useEffect(() => {
-    isEditingRef.current = isEditing;
-  }, [isEditing]);
-
-  useEffect(() => {
-    if (!isEditing && elementRef.current) {
-      if (elementRef.current.innerText !== value) {
-        elementRef.current.innerText = value;
-      }
-      setInitialValue(value);
-    }
-  }, [isEditing, value]);
-
-  const enableEditing = useCallback(() => {
-    if (!canEdit) return;
-    setInitialValue(value);
-    setIsEditing(true);
-    cancelRef.current = false;
-    requestAnimationFrame(() => {
-      const element = elementRef.current;
-      if (element) {
-        element.focus({ preventScroll: true });
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(element);
-        selection?.removeAllRanges();
-        selection?.addRange(range);
-      }
-    });
-  }, [canEdit, value]);
-
-  const commitChanges = useCallback(() => {
-    const element = elementRef.current;
-    if (!element) return;
-    const nextValue = element.innerText.trim();
-    onChange(nextValue);
-    setIsEditing(false);
-  }, [onChange]);
-
-  const cancelChanges = useCallback(() => {
-    const element = elementRef.current;
-    if (element) {
-      element.innerText = initialValue;
-    }
-    cancelRef.current = true;
-    setIsEditing(false);
-  }, [initialValue]);
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>) => {
-      if (!isEditing) return;
-      if (event.key === "Enter") {
-        event.preventDefault();
-        commitChanges();
-      }
-      if (event.key === "Escape") {
-        event.preventDefault();
-        cancelChanges();
-      }
-    },
-    [cancelChanges, commitChanges, isEditing],
-  );
-
-  const handleBlur = useCallback(() => {
-    if (!isEditingRef.current) {
-      cancelRef.current = false;
-      return;
-    }
-    if (cancelRef.current) {
-      cancelRef.current = false;
-      return;
-    }
-    commitChanges();
-  }, [commitChanges]);
-
-  const refCallback = useCallback(
-    (element: HTMLElement | null) => {
-      elementRef.current = element;
-    },
-    [value],
-  );
-
-  return createElement(
-    tag ?? "span",
-    {
-      ref: refCallback as unknown as Ref<any>,
-      className: `${className ?? ""} ${canEdit ? styles.editable : ""} ${
-        isEditing ? styles.editing : ""
-      }`,
-      contentEditable: isEditing,
-      suppressContentEditableWarning: true,
-      onClick: enableEditing,
-      onBlur: handleBlur,
-      onKeyDown: handleKeyDown,
-      role: canEdit ? "textbox" : undefined,
-      "aria-label": canEdit ? "Редактируемый текст" : undefined,
-      tabIndex: canEdit ? 0 : undefined,
-    },
-    value,
-  );
-}
-
 export default function Home() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [login, setLogin] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const { content, status, error, setContentState, reload } = useSiteContent(isAdmin);
+  const {
+    isAdmin,
+    isLoginModalOpen,
+    login,
+    password,
+    loginError,
+    setLogin,
+    setPassword,
+    handleOpenLogin,
+    handleCloseLogin,
+    handleLoginSubmit,
+    handleLogout,
+  } = useAdminAuth();
+  const { content, status, error, setContentState } = useSiteContent(isAdmin);
   const {
     programDays,
     speakers: speakerItems,
@@ -166,38 +51,6 @@ export default function Home() {
     scrollToElement(section);
   };
 
-  const handleOpenLogin = useCallback(() => {
-    setLogin("admin");
-    setPassword("");
-    setLoginError("");
-    setIsLoginModalOpen(true);
-  }, []);
-
-  const handleCloseLogin = useCallback(() => {
-    setIsLoginModalOpen(false);
-    setPassword("");
-    setLoginError("");
-  }, []);
-
-  const handleLoginSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      if (login === "admin" && password === "123456789") {
-        setIsAdmin(true);
-        setIsLoginModalOpen(false);
-        setPassword("");
-        setLoginError("");
-      } else {
-        setLoginError("Неверный логин или пароль");
-      }
-    },
-    [login, password],
-  );
-
-  const handleLogout = useCallback(() => {
-    setIsAdmin(false);
-  }, []);
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -221,6 +74,9 @@ export default function Home() {
             />
           </div>
           <nav className={styles.nav}>
+            <Link href="/articles" className={styles.navLink}>
+              Статьи
+            </Link>
             <button type="button" onClick={handleScrollToProgram}>
               Программа
             </button>
@@ -289,6 +145,9 @@ export default function Home() {
               <button type="button" className={styles.heroButtonSecondary} onClick={handleScrollToProgram}>
                 Программа
               </button>
+              <Link href="/articles" className={styles.heroButtonSecondary}>
+                Статьи участников
+              </Link>
             </div>
             <div className={styles.heroDetails}>
               <div className={styles.heroDetail}>

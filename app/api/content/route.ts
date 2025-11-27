@@ -27,6 +27,14 @@ const speakerSchema = z.object({
   photoUrl: z.string().url().or(z.literal("")),
 });
 
+const articleSchema = z.object({
+  title: z.string().min(1),
+  date: z.string().min(1),
+  author: z.string().min(1),
+  photoUrl: z.string().url().or(z.literal("")),
+  body: z.string().min(1),
+});
+
 const pricingSchema = z.object({
   label: z.string().optional(),
   period: z.string().min(1),
@@ -38,6 +46,9 @@ const pricingSchema = z.object({
 const siteContentSchema = z.object({
   programDays: z.array(daySchema).min(1),
   speakers: z.array(speakerSchema).min(1),
+  articles: z.array(articleSchema).min(1),
+  articlesHeading: z.string().min(1),
+  articlesSubtitle: z.string().min(1),
   pricingOptions: z.array(pricingSchema).min(1),
   registrationNotifications: z.object({
     title: z.string().min(1),

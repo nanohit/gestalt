@@ -52,7 +52,8 @@
   gap: 28px;
 }
 
-.nav button {
+.nav button,
+.navLink {
   font-family: "Geometria", sans-serif;
   font-size: 16px;
   font-weight: 600;
@@ -63,9 +64,11 @@
   padding: 8px 0;
   position: relative;
   transition: color 0.2s ease;
+  text-decoration: none;
 }
 
-.nav button::after {
+.nav button::after,
+.navLink::after {
   content: "";
   position: absolute;
   left: 0;
@@ -79,11 +82,13 @@
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.nav button:hover {
+.nav button:hover,
+.navLink:hover {
   color: #07899b;
 }
 
-.nav button:hover::after {
+.nav button:hover::after,
+.navLink:hover::after {
   opacity: 1;
   transform: translateY(0);
 }

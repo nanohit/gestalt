@@ -19,6 +19,14 @@ export type Speaker = {
   photoUrl: string;
 };
 
+export type Article = {
+  title: string;
+  date: string;
+  author: string;
+  photoUrl: string;
+  body: string;
+};
+
 export type PricingOption = {
   label?: string;
   period: string;
@@ -42,6 +50,9 @@ export type ContactSection = {
 export type SiteContent = {
   programDays: ProgramDay[];
   speakers: Speaker[];
+  articles: Article[];
+  articlesHeading: string;
+  articlesSubtitle: string;
   pricingOptions: PricingOption[];
   registrationNotifications: RegistrationNotifications;
   contactSection: ContactSection;
@@ -66,6 +77,15 @@ export function cloneSiteContent(content: SiteContent): SiteContent {
       tags: [...speaker.tags],
       photoUrl: speaker.photoUrl,
     })),
+    articles: content.articles.map((article) => ({
+      title: article.title,
+      date: article.date,
+      author: article.author,
+      photoUrl: article.photoUrl,
+      body: article.body,
+    })),
+    articlesHeading: content.articlesHeading,
+    articlesSubtitle: content.articlesSubtitle,
     pricingOptions: content.pricingOptions.map((option) => ({
       label: option.label,
       period: option.period,
@@ -105,6 +125,14 @@ export const createEmptySpeaker = (): Speaker => ({
   description: "Описание спикера",
   tags: ["Новый тег"],
   photoUrl: "",
+});
+
+export const createEmptyArticle = (): Article => ({
+  title: "Заголовок статьи",
+  date: "Дата публикации",
+  author: "Автор статьи",
+  photoUrl: "",
+  body: "Текст статьи",
 });
 
 export const createEmptyPricingOption = (): PricingOption => ({
@@ -225,6 +253,19 @@ export const RAW_DEFAULT_CONTENT: SiteContent = {
       photoUrl: "",
     },
   ],
+  articles: [
+    {
+      title: "Гештальт-подход в современном мире",
+      date: "24 ноября 2025",
+      author: "Команда конференции",
+      photoUrl: "",
+      body:
+        "Как сохранять осознанность и контакт в быстро меняющейся реальности. Практические рекомендации и размышления ведущих специалистов.",
+    },
+  ],
+  articlesHeading: "Статьи участников конференции",
+  articlesSubtitle:
+    "Подборка материалов и размышлений экспертов о гештальт-подходе, практике и исследованиях.",
   pricingOptions: [
     {
       label: "Лучшая цена",
@@ -288,6 +329,7 @@ export function normalizeContent(input: Partial<SiteContent> | null | undefined)
   const emptySession = createEmptySession();
   const emptyDay = createEmptyDay();
   const emptySpeaker = createEmptySpeaker();
+  const emptyArticle = createEmptyArticle();
   const emptyPricing = createEmptyPricingOption();
   const notificationsFallback = fallback.registrationNotifications;
   const contactFallback = fallback.contactSection;
@@ -331,6 +373,20 @@ export function normalizeContent(input: Partial<SiteContent> | null | undefined)
         })
       : fallback.speakers;
 
+  const articles =
+    Array.isArray(input.articles) && input.articles.length
+      ? input.articles.map((rawArticle) => ({
+          title: rawArticle?.title?.trim() || emptyArticle.title,
+          date: rawArticle?.date?.trim() || emptyArticle.date,
+          author: rawArticle?.author?.trim() || emptyArticle.author,
+          photoUrl: rawArticle?.photoUrl?.trim() || emptyArticle.photoUrl,
+          body: rawArticle?.body?.trim() || emptyArticle.body,
+        }))
+      : fallback.articles;
+
+  const articlesHeading = input.articlesHeading?.trim() || fallback.articlesHeading;
+  const articlesSubtitle = input.articlesSubtitle?.trim() || fallback.articlesSubtitle;
+
   const pricingOptions =
     Array.isArray(input.pricingOptions) && input.pricingOptions.length
       ? input.pricingOptions.map((rawOption) => {
@@ -369,6 +425,9 @@ export function normalizeContent(input: Partial<SiteContent> | null | undefined)
   return {
     programDays,
     speakers,
+    articles,
+    articlesHeading,
+    articlesSubtitle,
     pricingOptions,
     registrationNotifications,
     contactSection,

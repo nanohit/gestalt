@@ -1,0 +1,328 @@
+.page {
+  padding-top: 120px;
+  min-height: 100vh;
+}
+
+.section {
+  padding: 64px 0 96px;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.sectionTitle {
+  font-size: 42px;
+  font-weight: 600;
+  color: #15242f;
+}
+
+.sectionSubtitle {
+  font-size: 18px;
+  color: rgba(21, 36, 47, 0.7);
+  max-width: 680px;
+}
+
+.articleList {
+  display: grid;
+  gap: 32px;
+}
+
+.articleCard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 24px 60px rgba(13, 186, 203, 0.12);
+}
+
+.articleHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.articleDate {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(21, 36, 47, 0.55);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.articleTitle {
+  font-size: 28px;
+  font-weight: 600;
+  color: #15242f;
+  margin: 0;
+}
+
+.articleAuthorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.articleAuthor {
+  font-size: 18px;
+  color: rgba(21, 36, 47, 0.7);
+}
+
+.articlePhotoWrapper {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(13, 186, 203, 0.16) 0%, rgba(49, 224, 244, 0.28) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 30px rgba(13, 186, 203, 0.16);
+}
+
+.articlePhotoImage {
+  object-fit: cover;
+}
+
+.articlePhotoPlaceholder {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(21, 36, 47, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.articlePhotoUpload {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.72);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.articlePhotoUpload::after {
+  content: "";
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #13c8dc 0%, #31e0f4 100%);
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23fff' d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'/%3E%3C/svg%3E") center/14px 14px no-repeat;
+}
+
+.articlePhotoWrapper:hover .articlePhotoUpload {
+  opacity: 1;
+}
+
+.articlePhotoUpload input {
+  display: none;
+}
+
+
+.articleBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.articleBodyHeading {
+  font-size: 20px;
+  font-weight: 600;
+  color: #15242f;
+}
+
+.articleBodyContent {
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(21, 36, 47, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.articleBodyTextarea {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 196, 216, 0.28);
+  padding: 16px 18px;
+  font-family: "Geometria", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #15242f;
+  box-shadow: inset 0 8px 16px rgba(16, 196, 216, 0.06);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.articleBodyTextarea:focus {
+  outline: none;
+  border-color: rgba(16, 196, 216, 0.6);
+  box-shadow: 0 0 0 4px rgba(16, 196, 216, 0.12);
+}
+
+
+
+.articleBodyActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.saveButton {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #13c8dc 0%, #31e0f4 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.saveButton:disabled {
+  background: rgba(19, 200, 220, 0.4);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.saveButton:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(19, 200, 220, 0.35);
+}
+
+.articleBodyContentCollapsed {
+  max-height: 320px;
+  overflow: hidden;
+  position: relative;
+}
+
+.articleBodyContentCollapsed::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 80px;
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.2) 100%);
+  pointer-events: none;
+}
+
+.articleToggleButton {
+  margin-top: 12px;
+  align-self: flex-start;
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0aa5b5;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.articleToggleButton:hover {
+  color: #07899b;
+}
+
+.articleControls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.articleReorderControls {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.reorderButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 196, 216, 0.4);
+  background: rgba(255, 255, 255, 0.9);
+  color: #0aa5b5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reorderButton:hover:not(:disabled) {
+  border-color: rgba(16, 196, 216, 0.8);
+  color: #07899b;
+  box-shadow: 0 6px 18px rgba(13, 186, 203, 0.18);
+}
+
+.reorderButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.addArticleButton {
+  margin-top: 24px;
+}
+
+.emptyState {
+  padding: 32px;
+  border-radius: 20px;
+  border: 1px dashed rgba(16, 196, 216, 0.5);
+  background: rgba(255, 255, 255, 0.82);
+  text-align: center;
+  font-size: 18px;
+  color: rgba(21, 36, 47, 0.7);
+}
+
+.activeNavLink::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  padding: 16px 24px;
+  border-radius: 16px;
+  background: rgba(21, 36, 47, 0.86);
+  color: #ffffff;
+  font-size: 16px;
+  box-shadow: 0 12px 32px rgba(21, 36, 47, 0.3);
+}
+
+@media (max-width: 900px) {
+  .articleHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .articlePhotoWrapper {
+    margin-bottom: 16px;
+  }
+
+  .articleAuthorRow {
+    justify-content: center;
+  }
+}
